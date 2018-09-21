@@ -1,7 +1,7 @@
 
-#import "RNUberSso.h"
+#import "RNUberSSO.h"
 
-@implementation RNUberSso
+@implementation RNUberSSO
 
 - (dispatch_queue_t)methodQueue
 {

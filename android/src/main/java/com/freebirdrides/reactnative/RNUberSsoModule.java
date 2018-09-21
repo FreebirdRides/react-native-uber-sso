@@ -6,17 +6,17 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.Callback;
 
-public class RNUberSsoModule extends ReactContextBaseJavaModule {
+public class RNUberSSOModule extends ReactContextBaseJavaModule {
 
   private final ReactApplicationContext reactContext;
 
-  public RNUberSsoModule(ReactApplicationContext reactContext) {
+  public RNUberSSOModule(ReactApplicationContext reactContext) {
     super(reactContext);
     this.reactContext = reactContext;
   }
 
   @Override
   public String getName() {
-    return "RNUberSso";
+    return "RNUberSSO";
   }
 }

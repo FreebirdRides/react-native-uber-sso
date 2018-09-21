@@ -1,6 +1,6 @@
 
 import { NativeModules } from 'react-native';
 
-const { RNUberSso } = NativeModules;
+const { RNUberSSO } = NativeModules;
 
-export default RNUberSso;
+export default RNUberSSO;

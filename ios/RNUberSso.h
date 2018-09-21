@@ -5,7 +5,7 @@
 #import <React/RCTBridgeModule.h>
 #endif
 
-@interface RNUberSso : NSObject <RCTBridgeModule>
+@interface RNUberSSO : NSObject <RCTBridgeModule>
 
 @end
   
