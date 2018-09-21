@@ -1,10 +1,12 @@
 
 package com.freebirdrides.reactnative;
 
+import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.ReactApplicationContext;
+import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
-import com.facebook.react.bridge.Callback;
+import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 
 import com.uber.sdk.android.core.auth.AccessTokenManager;
@@ -23,27 +25,26 @@ import com.uber.sdk.rides.client.error.ErrorParser;
 import com.uber.sdk.rides.client.model.UserProfile;
 import com.uber.sdk.rides.client.services.RidesService;
 
+import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.util.Log;
-import android.widget.Toast;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
 import static com.freebirdrides.reactnative.RNUberSSOConstants.*;
 
 public class RNUberSSOModule extends ReactContextBaseJavaModule {
 
+  private static final String LOG_TAG = "RNUberSSOModule";
   private static final int LOGIN_BUTTON_CUSTOM_REQUEST_CODE = 1112;
   private static final int CUSTOM_BUTTON_REQUEST_CODE = 1113;
 
-  private Application application;
   private final ReactApplicationContext reactContext;
 
   private AccessTokenStorage accessTokenStorage;
@@ -51,10 +52,9 @@ public class RNUberSSOModule extends ReactContextBaseJavaModule {
   private SessionConfiguration configuration;
   private boolean isDebug;
 
-  public RNUberSSOModule(ReactApplicationContext reactContext, Application application) {
+  public RNUberSSOModule(ReactApplicationContext reactContext) {
     super(reactContext);
     this.reactContext = reactContext;
-    this.application = application;
     this.isDebug = false;
   }
 
@@ -66,7 +66,7 @@ public class RNUberSSOModule extends ReactContextBaseJavaModule {
   /**
    * PUBLIC REACT API
    * 
-   * isAvailable() Returns true if the fingerprint reader can be used
+   * initSdk() 
    */
   @ReactMethod
   public void initSdk(ReadableMap _options, Callback successCallback, Callback errorCallback) {
@@ -97,19 +97,19 @@ public class RNUberSSOModule extends ReactContextBaseJavaModule {
 
       configuration = new SessionConfiguration.Builder()
         .setClientId(clientId)
-        .setEnvironment(environment == "sandbox" ? Environment.SANDBOX : Environment.PRODUCTION)
+        .setEnvironment(environment == "sandbox" ? SessionConfiguration.Environment.SANDBOX : SessionConfiguration.Environment.PRODUCTION)
         .setRedirectUri(redirectUri)
         .setScopes(Arrays.asList(Scope.PROFILE, Scope.RIDE_WIDGETS)).build();
 
-      validateConfiguration(configuration);
+      // validateConfiguration(configuration);
 
-      accessTokenStorage = new AccessTokenManager(this);
+      accessTokenStorage = new AccessTokenManager(reactContext.getCurrentActivity());
 
       // Use a custom button with an onClickListener to call the LoginManager directly
       loginManager = new LoginManager(accessTokenStorage, new SampleLoginCallback(), configuration,
           CUSTOM_BUTTON_REQUEST_CODE);
 
-      this.isDebug = options.optBoolean(uberIsDebug, false);
+      isDebug = options.optBoolean(uberIsDebug, false);
 
       if (isDebug == true) {
         Log.d("UberSDK", "SSO setup complete");
@@ -124,15 +124,15 @@ public class RNUberSSOModule extends ReactContextBaseJavaModule {
 
   @ReactMethod
   public void login() {
-    loginManager.login(reactContext.currentActivity);
+    loginManager.login(reactContext.getCurrentActivity());
   }
 
-  @Override
+  // @Override
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-    Log.i(LOG_TAG, String.format("onActivityResult requestCode:[%s] resultCode [%s]", requestCode, resultCode));
+    Log.i(LOG_TAG, String.format("onActivityResult requestCode: [%s] resultCode [%s]", requestCode, resultCode));
 
     // Allow each a chance to catch it.
-    loginManager.onActivityResult(this, requestCode, resultCode, data);
+    loginManager.onActivityResult(reactContext.getCurrentActivity(), requestCode, resultCode, data);
   }
 
   private class SampleLoginCallback implements LoginCallback {
@@ -144,34 +144,38 @@ public class RNUberSSOModule extends ReactContextBaseJavaModule {
 
     @Override
     public void onLoginError(@NonNull AuthenticationError error) {
-      if (this.isDebug) {
-        Log.i(LOG_TAG, getString("Error occured during login: %s", error.name())); 
+      if (isDebug) {
+        Log.i(LOG_TAG, String.format("Error occured during login: [%s]", error.name())); 
       }
       handleError(uberOnSSOFailure, error.name());
     }
 
     @Override
     public void onLoginSuccess(@NonNull AccessToken accessToken) {
-      if (this.isDebug) {
-        Log.i(LOG_TAG, getString("Login successful with accessToken: %s", accessToken.getString()));
+      if (isDebug) {
+        Log.i(LOG_TAG, String.format("Login successful with accessToken: [%s]", accessToken.getToken()));
       }
-      handleSuccess(uberOnSSOSuccess, accessToken.getString());
+      handleSuccess(uberOnSSOSuccess, accessToken);
     }
 
     @Override
     public void onAuthorizationCodeReceived(@NonNull String authorizationCode) {
-      if (this.isDebug) {
-        Log.i(LOG_TAG, getString("Received an authorization code:\n %s", authorizationCode));
+      if (isDebug) {
+        Log.i(LOG_TAG, String.format("Received an authorization code:\n [%s]", authorizationCode));
       }
     }
 
-    private void handleSuccess(String eventType, String accessToken) {
+    private void handleSuccess(String eventType, @NonNull AccessToken accessToken) {
       JSONObject obj = new JSONObject();
+
+      Map<String,String> data = new HashMap<String,String>();
+      data.put("token", accessToken.getToken());
+      data.put("refreshToken", accessToken.getRefreshToken());
 
       try {
         obj.put("status", uberSuccess);
         obj.put("type", eventType);
-        obj.put("data", accessToken);
+        obj.put("data", new JSONObject(data));
         sendEvent(reactContext, uberOnSSOAccessToken, obj.toString());
       } catch (JSONException e) {
         e.printStackTrace();

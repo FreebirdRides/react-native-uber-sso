@@ -7,12 +7,12 @@ const uber = {}
 
 const eventsMap = {}
 
-uber.initSdk = (options, successC, errorC) => {
-  // console.log("initSdk: " + eventsMap['onSSOUberSSOAccessToken']);
+uber.initSdk = (options, successCallback, errorCallback) => {
+  console.log('initSdk: ' + eventsMap['onSSOUberSSOAccessToken'])
   // options.isDebug = eventsMap['isDebug']
   //   ? true
   //   : false
-  return RNUberSSO.initSdk(options, successC, errorC)
+  return RNUberSSO.initSdk(options, successCallback, errorCallback)
 }
 
 uber.login = () => {
@@ -31,7 +31,7 @@ uber.login = () => {
  * @returns {remove: function - unregister listener}
  */
 uber.onSSOUberSSOAccessToken = callback => {
-  //console.log("onSSOUberSSOAccessToken is called" );
+  console.log('onSSOUberSSOAccessToken is called')
 
   const listener = NativeAppEventEmitter.addListener(
     'onSSOUberSSOAccessToken',

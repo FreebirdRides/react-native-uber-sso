@@ -4,7 +4,7 @@ package com.freebirdrides.reactnative;
  * Created by neo on 09/21/18.
  */
 
-public class RNAppsFlyerConstants {
+public class RNUberSSOConstants {
 
     final static String SUCCESS = "success";
 
