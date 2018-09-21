@@ -8,7 +8,10 @@ const uber = {}
 const eventsMap = {}
 
 uber.initSdk = (options, successCallback, errorCallback) => {
-  console.log('initSdk: ' + eventsMap['onSSOUberSSOAccessToken'])
+  console.log(
+    'react-native-uber-sso initSdk onSSOUberSSOAccessToken is set?',
+    !!eventsMap['onSSOUberSSOAccessToken']
+  )
   // options.isDebug = eventsMap['isDebug']
   //   ? true
   //   : false
@@ -16,6 +19,7 @@ uber.initSdk = (options, successCallback, errorCallback) => {
 }
 
 uber.login = () => {
+  console.log('react-native-uber-sso login')
   return RNUberSSO.login()
 }
 
@@ -39,6 +43,7 @@ uber.onSSOUberSSOAccessToken = callback => {
       if (callback && typeof callback === typeof Function) {
         try {
           let data = JSON.parse(_data)
+          console.log('onSSOUberSSOAccessToken with data', data)
           callback(data)
         } catch (_error) {
           //throw new UberParseJSONException("...");

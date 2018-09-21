@@ -1,6 +1,7 @@
 
 package com.freebirdrides.reactnative;
 
+import com.facebook.react.bridge.ActivityEventListener;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContext;
@@ -14,6 +15,7 @@ import com.uber.sdk.android.core.auth.AuthenticationError;
 import com.uber.sdk.android.core.auth.LoginButton;
 import com.uber.sdk.android.core.auth.LoginCallback;
 import com.uber.sdk.android.core.auth.LoginManager;
+import com.uber.sdk.android.core.UberSdk;
 import com.uber.sdk.core.auth.AccessToken;
 import com.uber.sdk.core.auth.AccessTokenStorage;
 import com.uber.sdk.core.auth.Scope;
@@ -25,6 +27,7 @@ import com.uber.sdk.rides.client.error.ErrorParser;
 import com.uber.sdk.rides.client.model.UserProfile;
 import com.uber.sdk.rides.client.services.RidesService;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -39,7 +42,7 @@ import org.json.JSONObject;
 
 import static com.freebirdrides.reactnative.RNUberSSOConstants.*;
 
-public class RNUberSSOModule extends ReactContextBaseJavaModule {
+public class RNUberSSOModule extends ReactContextBaseJavaModule implements ActivityEventListener {
 
   private static final String LOG_TAG = "RNUberSSOModule";
   private static final int LOGIN_BUTTON_CUSTOM_REQUEST_CODE = 1112;
@@ -99,9 +102,19 @@ public class RNUberSSOModule extends ReactContextBaseJavaModule {
         .setClientId(clientId)
         .setEnvironment(environment == "sandbox" ? SessionConfiguration.Environment.SANDBOX : SessionConfiguration.Environment.PRODUCTION)
         .setRedirectUri(redirectUri)
-        .setScopes(Arrays.asList(Scope.PROFILE, Scope.RIDE_WIDGETS)).build();
+        .setScopes(Arrays.asList(
+          Scope.HISTORY, 
+          Scope.PLACES, 
+          Scope.PROFILE, 
+          Scope.ALL_TRIPS,
+          Scope.REQUEST_RECEIPT,
+          Scope.REQUEST
+        )).build();
+        //.setScopes(Arrays.asList(Scope.PROFILE, Scope.RIDE_WIDGETS)).build();
 
       // validateConfiguration(configuration);
+
+      UberSdk.initialize(configuration);
 
       accessTokenStorage = new AccessTokenManager(reactContext.getCurrentActivity());
 
@@ -127,12 +140,22 @@ public class RNUberSSOModule extends ReactContextBaseJavaModule {
     loginManager.login(reactContext.getCurrentActivity());
   }
 
-  // @Override
-  protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+  /*
+   * Called when the OAuth browser activity completes
+   */
+  @Override
+  public void onActivityResult(Activity activity, int requestCode, int resultCode, Intent data) {
+  // protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     Log.i(LOG_TAG, String.format("onActivityResult requestCode: [%s] resultCode [%s]", requestCode, resultCode));
 
     // Allow each a chance to catch it.
-    loginManager.onActivityResult(reactContext.getCurrentActivity(), requestCode, resultCode, data);
+    loginManager.onActivityResult(activity, requestCode, resultCode, data);
+    // loginManager.onActivityResult(reactContext.getCurrentActivity(), requestCode, resultCode, data);
+  }
+
+  @Override
+  public void onNewIntent(Intent intent) {
+
   }
 
   private class SampleLoginCallback implements LoginCallback {
