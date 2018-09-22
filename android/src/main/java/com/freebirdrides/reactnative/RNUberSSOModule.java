@@ -147,13 +147,11 @@ public class RNUberSSOModule extends ReactContextBaseJavaModule implements Activ
    */
   @Override
   public void onActivityResult(Activity activity, int requestCode, int resultCode, Intent data) {
-  // protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     String message = String.format("onActivityResult requestCode: [%s] resultCode [%s]", requestCode, resultCode);
     Log.i(LOG_TAG, message);
     Toast.makeText(reactContext.getCurrentActivity(), message, Toast.LENGTH_LONG).show(); 
     // Allow each a chance to catch it.
     loginManager.onActivityResult(activity, requestCode, resultCode, data);
-    // loginManager.onActivityResult(reactContext.getCurrentActivity(), requestCode, resultCode, data);
   }
 
   @Override
@@ -177,8 +175,8 @@ public class RNUberSSOModule extends ReactContextBaseJavaModule implements Activ
       String message = String.format("Error occured during login: [%s]", error.name());
       if (isDebug) {
         Log.i(LOG_TAG, message);
+        Toast.makeText(reactContext.getCurrentActivity(), message, Toast.LENGTH_LONG).show();
       }
-      Toast.makeText(reactContext.getCurrentActivity(), message, Toast.LENGTH_LONG).show();
       handleError(uberOnSSOFailure, error.name());
     }
 
@@ -187,8 +185,8 @@ public class RNUberSSOModule extends ReactContextBaseJavaModule implements Activ
       String message = String.format("Login successful with accessToken: [%s]", accessToken.getToken());
       if (isDebug) {
         Log.i(LOG_TAG, message);
+        Toast.makeText(reactContext.getCurrentActivity(), message, Toast.LENGTH_LONG).show();
       }
-      Toast.makeText(reactContext.getCurrentActivity(), message, Toast.LENGTH_LONG).show();
       handleSuccess(uberOnSSOSuccess, accessToken);
     }
 
@@ -197,8 +195,8 @@ public class RNUberSSOModule extends ReactContextBaseJavaModule implements Activ
       String message = String.format("Received an authorization code:\n [%s]", authorizationCode);
       if (isDebug) {
         Log.i(LOG_TAG, message);
+        Toast.makeText(reactContext.getCurrentActivity(), message, Toast.LENGTH_LONG).show();
       }
-      Toast.makeText(reactContext.getCurrentActivity(), message, Toast.LENGTH_LONG).show();
     }
 
     private void handleSuccess(String eventType, @NonNull AccessToken accessToken) {
