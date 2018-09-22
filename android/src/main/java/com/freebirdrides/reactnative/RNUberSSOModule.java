@@ -31,6 +31,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -59,6 +60,7 @@ public class RNUberSSOModule extends ReactContextBaseJavaModule implements Activ
     super(reactContext);
     this.reactContext = reactContext;
     this.isDebug = false;
+    this.reactContext.addActivityEventListener(this);
   }
 
   @Override
@@ -110,11 +112,11 @@ public class RNUberSSOModule extends ReactContextBaseJavaModule implements Activ
           Scope.REQUEST_RECEIPT,
           Scope.REQUEST
         )).build();
-        //.setScopes(Arrays.asList(Scope.PROFILE, Scope.RIDE_WIDGETS)).build();
+        // .setScopes(Arrays.asList(Scope.PROFILE, Scope.RIDE_WIDGETS)).build();
 
       // validateConfiguration(configuration);
 
-      UberSdk.initialize(configuration);
+      // UberSdk.initialize(configuration);
 
       accessTokenStorage = new AccessTokenManager(reactContext.getCurrentActivity());
 
@@ -146,8 +148,9 @@ public class RNUberSSOModule extends ReactContextBaseJavaModule implements Activ
   @Override
   public void onActivityResult(Activity activity, int requestCode, int resultCode, Intent data) {
   // protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-    Log.i(LOG_TAG, String.format("onActivityResult requestCode: [%s] resultCode [%s]", requestCode, resultCode));
-
+    String message = String.format("onActivityResult requestCode: [%s] resultCode [%s]", requestCode, resultCode);
+    Log.i(LOG_TAG, message);
+    Toast.makeText(reactContext.getCurrentActivity(), message, Toast.LENGTH_LONG).show(); 
     // Allow each a chance to catch it.
     loginManager.onActivityResult(activity, requestCode, resultCode, data);
     // loginManager.onActivityResult(reactContext.getCurrentActivity(), requestCode, resultCode, data);
@@ -162,37 +165,47 @@ public class RNUberSSOModule extends ReactContextBaseJavaModule implements Activ
 
     @Override
     public void onLoginCancel() {
-      Log.i(LOG_TAG, "User cancels login");
+      String message = "User cancels login";
+      if (isDebug) {
+        Log.i(LOG_TAG, message);
+        Toast.makeText(reactContext.getCurrentActivity(), message, Toast.LENGTH_LONG).show();
+      }
     }
 
     @Override
     public void onLoginError(@NonNull AuthenticationError error) {
+      String message = String.format("Error occured during login: [%s]", error.name());
       if (isDebug) {
-        Log.i(LOG_TAG, String.format("Error occured during login: [%s]", error.name())); 
+        Log.i(LOG_TAG, message);
       }
+      Toast.makeText(reactContext.getCurrentActivity(), message, Toast.LENGTH_LONG).show();
       handleError(uberOnSSOFailure, error.name());
     }
 
     @Override
     public void onLoginSuccess(@NonNull AccessToken accessToken) {
+      String message = String.format("Login successful with accessToken: [%s]", accessToken.getToken());
       if (isDebug) {
-        Log.i(LOG_TAG, String.format("Login successful with accessToken: [%s]", accessToken.getToken()));
+        Log.i(LOG_TAG, message);
       }
+      Toast.makeText(reactContext.getCurrentActivity(), message, Toast.LENGTH_LONG).show();
       handleSuccess(uberOnSSOSuccess, accessToken);
     }
 
     @Override
     public void onAuthorizationCodeReceived(@NonNull String authorizationCode) {
+      String message = String.format("Received an authorization code:\n [%s]", authorizationCode);
       if (isDebug) {
-        Log.i(LOG_TAG, String.format("Received an authorization code:\n [%s]", authorizationCode));
+        Log.i(LOG_TAG, message);
       }
+      Toast.makeText(reactContext.getCurrentActivity(), message, Toast.LENGTH_LONG).show();
     }
 
     private void handleSuccess(String eventType, @NonNull AccessToken accessToken) {
       JSONObject obj = new JSONObject();
 
       Map<String,String> data = new HashMap<String,String>();
-      data.put("token", accessToken.getToken());
+      data.put("accessToken", accessToken.getToken());
       data.put("refreshToken", accessToken.getRefreshToken());
 
       try {
