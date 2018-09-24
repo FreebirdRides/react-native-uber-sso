@@ -98,7 +98,7 @@ public class RNUberSSOModule extends ReactContextBaseJavaModule implements Activ
         return;
       }
 
-      environment = options.optString(environment, "sandbox");
+      environment = options.optString(uberEnvironment, "sandbox");
 
       configuration = new SessionConfiguration.Builder()
         .setClientId(clientId)
@@ -112,11 +112,10 @@ public class RNUberSSOModule extends ReactContextBaseJavaModule implements Activ
           Scope.REQUEST_RECEIPT,
           Scope.REQUEST
         )).build();
-        // .setScopes(Arrays.asList(Scope.PROFILE, Scope.RIDE_WIDGETS)).build();
 
       // validateConfiguration(configuration);
 
-      // UberSdk.initialize(configuration);
+      UberSdk.initialize(configuration);
 
       accessTokenStorage = new AccessTokenManager(reactContext.getCurrentActivity());
 
@@ -126,7 +125,7 @@ public class RNUberSSOModule extends ReactContextBaseJavaModule implements Activ
 
       isDebug = options.optBoolean(uberIsDebug, false);
 
-      if (isDebug == true) {
+      if (isDebug) {
         Log.d("UberSDK", "SSO setup complete");
       }
 

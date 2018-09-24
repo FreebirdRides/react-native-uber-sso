@@ -9,6 +9,7 @@ public class RNUberSSOConstants {
     final static String SUCCESS = "success";
 
     final static String uberClientId = "clientId";
+    final static String uberEnvironment = "environment";
     final static String uberIsDebug = "isDebug";
     final static String uberRedirectUri = "redirectUri";
 
