@@ -63,6 +63,42 @@ RCT_EXPORT_METHOD(initSdk: (NSDictionary*)initSdkOptions
   }
 }
 
+-(void) handleCallback:(NSDictionary *) message {
+  NSError *error;
+  
+  if ([NSJSONSerialization isValidJSONObject:message]) {
+    NSData *jsonMessage = [NSJSONSerialization dataWithJSONObject:message
+                                                          options:0
+                                                            error:&error];
+    if (jsonMessage) {
+      NSString *jsonMessageStr = [[NSString alloc] initWithBytes:[jsonMessage bytes] length:[jsonMessage length] encoding:NSUTF8StringEncoding];
+      
+      NSString* status = (NSString*)[message objectForKey: @"status"];
+      
+      if([status isEqualToString:uberSuccess]) {
+        [self reportOnSuccess:jsonMessageStr];
+      } else {
+        [self reportOnFailure:jsonMessageStr];
+      }
+      
+      NSLog(@"jsonMessageStr = %@",jsonMessageStr);
+    } else {
+      NSLog(@"%@",error);
+    }
+  }
+  else{
+    [self reportOnFailure:@"failed to parse Response"];
+  }
+}
+
+-(void) reportOnFailure:(NSString *)errorMessage {
+//  [self.bridge.eventDispatcher sendAppEventWithName:afOnInstallConversionData body:errorMessage];
+}
+
+-(void) reportOnSuccess:(NSString *)data {
+//  [self.bridge.eventDispatcher sendAppEventWithName:afOnInstallConversionData body:data];
+}
+
 RCT_EXPORT_METHOD(login)
 {
   UBSDKLoginManager *loginManager = [[UBSDKLoginManager alloc] init];
@@ -79,6 +115,26 @@ RCT_EXPORT_METHOD(login)
                               completion: ^(UBSDKAccessToken * _Nullable accessToken, NSError * _Nullable error) {
                                 // Completion block. If accessToken is non-nil, you're good to go
                                 // Otherwise, error.code corresponds to the RidesAuthenticationErrorType that occured
+                                if (error) {
+                                  NSDictionary* errorMessage = @{
+                                                                 @"status": uberFailure,
+                                                                 @"type": uberOnSSOAccessToken,
+                                                                 @"data": error.localizedDescription
+                                                                 };
+                                  
+                                  [self performSelectorOnMainThread:@selector(handleCallback:) withObject:errorMessage waitUntilDone:NO];
+                                } else {
+                                  NSDictionary* message = @{
+                                                            @"status": uberSuccess,
+                                                            @"type": uberOnSSOAccessToken,
+                                                            @"data": @{
+                                                                @"accessToken": accessToken.tokenString,
+                                                                @"refreshToken": accessToken.refreshToken
+                                                                }
+                                                            };
+                                  
+                                  [self performSelectorOnMainThread:@selector(handleCallback:) withObject:message waitUntilDone:NO];
+                                }
                               }];
 }
 
