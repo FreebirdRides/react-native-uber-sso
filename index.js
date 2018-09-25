@@ -48,7 +48,8 @@ uber.onSSOUberSSOAccessToken = callback => {
         } catch (_error) {
           //throw new UberParseJSONException("...");
           //TODO: for today we return an error in callback
-          callback(new UberParseJSONException('Invalid data structure', _data))
+          //callback(new UberParseJSONException('Invalid data structure', _data))
+          callback(null)
         }
       }
     }

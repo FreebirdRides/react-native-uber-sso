@@ -1,6 +1,6 @@
 declare module 'react-native-uber-sso' {
   export interface IUberSSOResult {
-    data: any | Error
+    data: any
     status: string
     type: string
   }
@@ -19,7 +19,7 @@ declare module 'react-native-uber-sso' {
     ): void
     static login(): void
     static onSSOUberSSOAccessToken(
-      callback: (data: IUberSSOResult) => void
+      callback: (data: IUberSSOResult | null) => void
     ): UberInstallConversionDisposer
   }
 }
