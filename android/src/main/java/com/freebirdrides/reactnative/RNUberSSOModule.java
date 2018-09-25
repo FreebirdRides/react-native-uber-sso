@@ -169,6 +169,7 @@ public class RNUberSSOModule extends ReactContextBaseJavaModule implements Activ
         Log.i(LOG_TAG, message);
         Toast.makeText(reactContext.getCurrentActivity(), message, Toast.LENGTH_LONG).show();
       }
+      handleError(uberOnSSOFailure, message);
     }
 
     @Override
