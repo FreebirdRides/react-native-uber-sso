@@ -5,8 +5,6 @@
 
 @implementation RNUberSSO
 
-@synthesize bridge = _bridge;
-
 static NSString *const NO_CLIENT_ID_FOUND           = @"No 'clientId' found or its empty";
 static NSString *const NO_REDIRECT_URI_FOUND        = @"No 'redirectUri' found or its empty";
 static NSString *const SUCCESS                      = @"Success";
@@ -16,6 +14,11 @@ static NSString *const SUCCESS                      = @"Success";
     return dispatch_get_main_queue();
 }
 RCT_EXPORT_MODULE()
+
+- (NSArray<NSString *> *)supportedEvents
+{
+  return @[uberOnSSOAccessToken];
+}
 
 RCT_EXPORT_METHOD(initSdk: (NSDictionary*)initSdkOptions
                   successCallback :(RCTResponseSenderBlock)successCallback
@@ -92,11 +95,11 @@ RCT_EXPORT_METHOD(initSdk: (NSDictionary*)initSdkOptions
 }
 
 -(void) reportOnFailure:(NSString *)errorMessage {
-//  [self.bridge.eventDispatcher sendAppEventWithName:afOnInstallConversionData body:errorMessage];
+  [self sendEventWithName:uberOnSSOAccessToken body:errorMessage];
 }
 
 -(void) reportOnSuccess:(NSString *)data {
-//  [self.bridge.eventDispatcher sendAppEventWithName:afOnInstallConversionData body:data];
+  [self sendEventWithName:uberOnSSOAccessToken body:data];
 }
 
 RCT_EXPORT_METHOD(login)
