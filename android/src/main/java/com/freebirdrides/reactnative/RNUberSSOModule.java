@@ -147,8 +147,10 @@ public class RNUberSSOModule extends ReactContextBaseJavaModule implements Activ
   @Override
   public void onActivityResult(Activity activity, int requestCode, int resultCode, Intent data) {
     String message = String.format("onActivityResult requestCode: [%s] resultCode [%s]", requestCode, resultCode);
-    Log.i(LOG_TAG, message);
-    Toast.makeText(reactContext.getCurrentActivity(), message, Toast.LENGTH_LONG).show(); 
+    if (isDebug) {
+      Log.i(LOG_TAG, message);
+      Toast.makeText(reactContext.getCurrentActivity(), message, Toast.LENGTH_LONG).show();
+    }
     // Allow each a chance to catch it.
     loginManager.onActivityResult(activity, requestCode, resultCode, data);
   }
