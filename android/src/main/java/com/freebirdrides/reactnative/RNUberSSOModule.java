@@ -138,7 +138,7 @@ public class RNUberSSOModule extends ReactContextBaseJavaModule implements Activ
 
   @ReactMethod
   public void login() {
-    if (loginManager) {
+    if (loginManager != null) {
       loginManager.login(reactContext.getCurrentActivity());
     }
   }
@@ -154,7 +154,7 @@ public class RNUberSSOModule extends ReactContextBaseJavaModule implements Activ
       Toast.makeText(reactContext.getCurrentActivity(), message, Toast.LENGTH_LONG).show();
     }
     // Allow each a chance to catch it.
-    if (loginManager) {
+    if (loginManager != null) {
       loginManager.onActivityResult(activity, requestCode, resultCode, data);
     }
   }
